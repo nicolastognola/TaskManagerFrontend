@@ -6,14 +6,29 @@ const TaskManagerPage = () => {
     const [tareas, setTareas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [nuevaTarea, setNuevaTarea] = useState('');
+    const [filtroCompletadas, setFiltroCompletadas] = useState(null); // null = todas, true = completadas, false = no completadas
+    const [busqueda, setBusqueda] = useState(''); // Nuevo estado para el término de búsqueda
 
     useEffect(() => {
         fetchTareas();
-    }, []);
+    }, [filtroCompletadas, busqueda]); // Refetch tasks when filters or search query change
 
     const fetchTareas = async () => {
+        setLoading(true);
         try {
-            const response = await fetch('http://localhost:8000/api/tasks');
+            let url = 'http://localhost:8000/api/tasks';
+            const params = new URLSearchParams();
+            if (filtroCompletadas !== null) {
+                params.append('completed', filtroCompletadas);
+            }
+            if (busqueda) {
+                params.append('search', busqueda);
+            }
+            if (params.toString()) {
+                url += `?${params.toString()}`;
+            }
+
+            const response = await fetch(url);
             if (!response.ok) throw new Error('Error al obtener las tareas');
             const data = await response.json();
             setTareas(data);
@@ -68,6 +83,10 @@ const TaskManagerPage = () => {
         }
     };
 
+    const cambiarFiltro = (filtro) => {
+        setFiltroCompletadas(filtro);
+    };
+
     return (
         <div style={{ maxWidth: '800px', margin: '50px auto', padding: '20px', background: '#fff', borderRadius: '8px', boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)' }}>
             <Header />
@@ -83,14 +102,36 @@ const TaskManagerPage = () => {
                     Agregar
                 </button>
             </div>
+            <div style={{ marginBottom: '20px' }}>
+                <input
+                    type="text"
+                    placeholder="Buscar tarea por nombre"
+                    value={busqueda}
+                    onChange={(e) => setBusqueda(e.target.value)} // Actualiza el término de búsqueda
+                    style={{ marginRight: '10px', padding: '5px', width: '70%' }}
+                />
+            </div>
             {loading ? (
                 <p>Cargando tareas...</p>
             ) : (
-                <TablaTareas
-                    tareas={tareas}
-                    onEliminar={eliminarTarea}
-                    onToggleEstado={toggleEstadoTarea}
-                />
+                <>
+                    <TablaTareas
+                        tareas={tareas}
+                        onEliminar={eliminarTarea}
+                        onToggleEstado={toggleEstadoTarea}
+                    />
+                    <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                        <button onClick={() => cambiarFiltro(null)} style={{ padding: '5px 10px', marginRight: '5px' }}>
+                            Todas
+                        </button>
+                        <button onClick={() => cambiarFiltro(true)} style={{ padding: '5px 10px', marginRight: '5px' }}>
+                            Completadas
+                        </button>
+                        <button onClick={() => cambiarFiltro(false)} style={{ padding: '5px 10px' }}>
+                            No Completadas
+                        </button>
+                    </div>
+                </>
             )}
         </div>
     );
