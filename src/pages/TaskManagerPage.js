@@ -6,13 +6,12 @@ const TaskManagerPage = () => {
     const [tareas, setTareas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [nuevaTarea, setNuevaTarea] = useState('');
-    const [filtroCompletadas, setFiltroCompletadas] = useState(null); // null = todas, true = completadas, false = no completadas
-    const [busqueda, setBusqueda] = useState(''); // Nuevo estado para el término de búsqueda
+    const [filtroCompletadas, setFiltroCompletadas] = useState(null); 
+    const [busqueda, setBusqueda] = useState('');
 
     useEffect(() => {
         fetchTareas();
-    }, [filtroCompletadas, busqueda]); // Refetch tasks when filters or search query change
-
+    }, [filtroCompletadas, busqueda]); 
     const fetchTareas = async () => {
         setLoading(true);
         try {
@@ -107,7 +106,7 @@ const TaskManagerPage = () => {
                     type="text"
                     placeholder="Buscar tarea por nombre"
                     value={busqueda}
-                    onChange={(e) => setBusqueda(e.target.value)} // Actualiza el término de búsqueda
+                    onChange={(e) => setBusqueda(e.target.value)} 
                     style={{ marginRight: '10px', padding: '5px', width: '70%' }}
                 />
             </div>
